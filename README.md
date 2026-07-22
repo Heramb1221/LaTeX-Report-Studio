@@ -36,9 +36,7 @@ decision, not a missing feature.
 
 ## Live Demo
 
-```md
-Live App:      [latex-report-studio.vercel.app](https://la-te-x-report-studio.vercel.app/)
-```
+**Live Application:** https://la-te-x-report-studio.vercel.app/
 
 ---
 
@@ -47,6 +45,8 @@ Live App:      [latex-report-studio.vercel.app](https://la-te-x-report-studio.ve
 Full-stack SaaS-style web application — authenticated multi-tenant document
 workspace with a real backend (MongoDB), external API integrations (Gemini,
 YtoTech LaTeX compiler, AWS S3), and a rich client-side editor.
+
+---
 
 ## Project Status
 
@@ -396,16 +396,11 @@ one project at a time). Scaling considerations if usage grew:
 
 
 ---
-
-## Contribution Guidelines
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, code standards, and
-the PR process. Small fixes (typos, broken links, minor bugs) can go straight
-to a PR; larger changes should start as an issue.
-
 ## License
 
-[MIT](LICENSE) © 2025 Heramb ([github.com/Heramb1221](https://github.com/Heramb1221))
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+© 2026 Heramb Chaudhari · GitHub: [@Heramb1221](https://github.com/Heramb1221)
 
 ---
 
