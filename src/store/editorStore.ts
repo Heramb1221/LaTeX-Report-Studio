@@ -1,11 +1,7 @@
 import { create } from 'zustand';
 
-// REPLACES src/store/editorStore.ts from Phase 10.
-// Only addition: imageManagerOpen boolean.
-
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'unsaved';
 type AiDrawerMode = 'humanize' | 'convert' | 'grammar';
-export type BottomPanelTab = 'ai' | 'citations' | 'diagrams' | 'images' | 'tables' | null;
 
 interface EditorStore {
   activeChapterId: string | null;
@@ -24,15 +20,31 @@ interface EditorStore {
   setCompiledPdf: (base64: string | null) => void;
   setCompileError: (error: string | null) => void;
 
-  activeBottomPanelTab: BottomPanelTab;
-  setActiveBottomPanelTab: (tab: BottomPanelTab) => void;
-
+  // ── AI Drawer ────────────────────────────────────────────────────────────────
+  isAiDrawerOpen: boolean;
   aiDrawerMode: AiDrawerMode;
+  setIsAiDrawerOpen: (open: boolean) => void;
   setAiDrawerMode: (mode: AiDrawerMode) => void;
 
+  // ── Diagram modals ───────────────────────────────────────────────────────────
+  newDiagramModalOpen: boolean;
+  setNewDiagramModalOpen: (open: boolean) => void;
   editingDiagramId: string | null;
   setEditingDiagramId: (id: string | null) => void;
 
+  // ── Citation modal ───────────────────────────────────────────────────────────
+  citationModalOpen: boolean;
+  setCitationModalOpen: (open: boolean) => void;
+
+  // ── Table builder modal ──────────────────────────────────────────────────────
+  tableBuilderOpen: boolean;
+  setTableBuilderOpen: (open: boolean) => void;
+
+  // ── Image manager modal ──────────────────────────────────────────────────────
+  imageManagerOpen: boolean;
+  setImageManagerOpen: (open: boolean) => void;
+
+  // ── Focus mode ───────────────────────────────────────────────────────────────
   focusMode: boolean;
   setFocusMode: (open: boolean) => void;
 
@@ -47,9 +59,13 @@ const INITIAL: Omit<
   | 'setIsCompiling'
   | 'setCompiledPdf'
   | 'setCompileError'
-  | 'setActiveBottomPanelTab'
+  | 'setIsAiDrawerOpen'
   | 'setAiDrawerMode'
+  | 'setNewDiagramModalOpen'
   | 'setEditingDiagramId'
+  | 'setCitationModalOpen'
+  | 'setTableBuilderOpen'
+  | 'setImageManagerOpen'
   | 'setFocusMode'
   | 'reset'
 > = {
@@ -59,9 +75,13 @@ const INITIAL: Omit<
   isCompiling: false,
   compiledPdfBase64: null,
   compileError: null,
-  activeBottomPanelTab: null,
+  isAiDrawerOpen: false,
   aiDrawerMode: 'humanize',
+  newDiagramModalOpen: false,
   editingDiagramId: null,
+  citationModalOpen: false,
+  tableBuilderOpen: false,
+  imageManagerOpen: false,
   focusMode: false,
 };
 
@@ -78,11 +98,16 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setCompileError: (error) =>
     set({ compileError: error, compiledPdfBase64: null, isCompiling: false }),
 
-  setActiveBottomPanelTab: (tab) => set({ activeBottomPanelTab: tab }),
+  setIsAiDrawerOpen: (open) => set({ isAiDrawerOpen: open }),
   setAiDrawerMode: (mode) => set({ aiDrawerMode: mode }),
 
+  setNewDiagramModalOpen: (open) => set({ newDiagramModalOpen: open }),
   setEditingDiagramId: (id) => set({ editingDiagramId: id }),
-  
+
+  setCitationModalOpen: (open) => set({ citationModalOpen: open }),
+  setTableBuilderOpen: (open) => set({ tableBuilderOpen: open }),
+  setImageManagerOpen: (open) => set({ imageManagerOpen: open }),
+
   setFocusMode: (open) => set({ focusMode: open }),
 
   reset: () => set(INITIAL),

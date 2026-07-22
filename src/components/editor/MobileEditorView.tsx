@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEditorStore } from '@/store/editorStore';
 import { useCompile } from '@/hooks/useCompile';
 import type { IProject } from '@/types';
-import type { BottomPanelTab } from '@/store/editorStore';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -18,7 +17,12 @@ import {
 } from '@/components/ui/sheet';
 import { ProjectExplorer } from './ProjectExplorer';
 import { PdfViewer } from './PdfViewer';
-import { EditorBottomPanel } from './EditorBottomPanel';
+import { AiDrawer } from './AiDrawer';
+import { CitationModal } from './CitationModal';
+import { DiagramModal } from './DiagramModal';
+import { ImageManagerModal } from './ImageManagerModal';
+import { TableBuilderModal } from './TableBuilderModal';
+import { NewDiagramModal } from './NewDiagramModal';
 
 import {
   ArrowLeft,
@@ -32,9 +36,6 @@ import {
   GitFork,
   BookMarked,
   Sparkles,
-  X,
-  CheckCircle2,
-  Circle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,15 +51,6 @@ const MonacoLatexEditor = dynamic(
     ),
   }
 );
-
-// ─── Tool pill config ──────────────────────────────────────────────────────────
-const TOOLS: { tab: BottomPanelTab; icon: React.ElementType; label: string }[] = [
-  { tab: 'tables',    icon: Table2,     label: 'Table'    },
-  { tab: 'images',    icon: ImagePlus,  label: 'Image'    },
-  { tab: 'diagrams',  icon: GitFork,    label: 'Diagram'  },
-  { tab: 'citations', icon: BookMarked, label: 'Citation' },
-  { tab: 'ai',        icon: Sparkles,   label: 'AI'       },
-];
 
 // ─── Save status dot ──────────────────────────────────────────────────────────
 function MobileSaveIndicator() {
@@ -80,25 +72,35 @@ interface MobileEditorViewProps {
 }
 
 export function MobileEditorView({ project }: MobileEditorViewProps) {
-  const { activeBottomPanelTab, setActiveBottomPanelTab } = useEditorStore();
+  const {
+    setIsAiDrawerOpen, setAiDrawerMode,
+    setNewDiagramModalOpen,
+    setCitationModalOpen,
+    setTableBuilderOpen,
+    setImageManagerOpen,
+  } = useEditorStore();
   const { compile, isCompiling } = useCompile(project._id);
 
   // 'editor' | 'pdf' — which full-screen view is active
   const [activeView, setActiveView] = useState<'editor' | 'pdf'>('editor');
 
-  // Whether the tool sheet is open
-  const toolSheetOpen = activeBottomPanelTab !== null;
-
-  const handleToolTap = (tab: BottomPanelTab) => {
-    // Toggle off if already active
-    if (activeBottomPanelTab === tab) {
-      setActiveBottomPanelTab(null);
-    } else {
-      setActiveBottomPanelTab(tab);
+  const handleToolTap = (action: string) => {
+    switch (action) {
+      case 'tables':    setTableBuilderOpen(true);                            break;
+      case 'images':    setImageManagerOpen(true);                            break;
+      case 'diagrams':  setNewDiagramModalOpen(true);                         break;
+      case 'citations': setCitationModalOpen(true);                           break;
+      case 'ai':        setAiDrawerMode('humanize'); setIsAiDrawerOpen(true); break;
     }
   };
 
-  const handleCloseSheet = () => setActiveBottomPanelTab(null);
+  const TOOLS = [
+    { key: 'tables',    icon: Table2,     label: 'Table'    },
+    { key: 'images',    icon: ImagePlus,  label: 'Image'    },
+    { key: 'diagrams',  icon: GitFork,    label: 'Diagram'  },
+    { key: 'citations', icon: BookMarked, label: 'Citation' },
+    { key: 'ai',        icon: Sparkles,   label: 'AI'       },
+  ];
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
@@ -206,67 +208,6 @@ export function MobileEditorView({ project }: MobileEditorViewProps) {
         </AnimatePresence>
       </div>
 
-      {/* ── Tool Sheet (slides up from bottom, full-height) ───────────── */}
-      <AnimatePresence>
-        {toolSheetOpen && (
-          <>
-            {/* Scrim */}
-            <motion.div
-              key="scrim"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40"
-              onClick={handleCloseSheet}
-            />
-
-            {/* Sheet panel */}
-            <motion.div
-              key="sheet"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-              className="fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-background/95 backdrop-blur-2xl border-t rounded-t-2xl overflow-hidden"
-              style={{ height: '75vh' }}
-            >
-              {/* Drag handle + header */}
-              <div className="flex flex-col items-center pt-2 pb-1 shrink-0">
-                <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-2" />
-                <div className="w-full flex items-center justify-between px-4 pb-2 border-b">
-                  <h2 className="text-sm font-semibold capitalize">
-                    {activeBottomPanelTab === 'ai'
-                      ? 'AI Assistant'
-                      : activeBottomPanelTab === 'citations'
-                      ? 'Citation Manager'
-                      : activeBottomPanelTab === 'diagrams'
-                      ? 'Diagram Editor'
-                      : activeBottomPanelTab === 'images'
-                      ? 'Image Manager'
-                      : activeBottomPanelTab === 'tables'
-                      ? 'Table Builder'
-                      : ''}
-                  </h2>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 rounded-full"
-                    onClick={handleCloseSheet}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Tool content */}
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <EditorBottomPanel project={project} />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* ── Floating Pill Toolbar ─────────────────────────────────────── */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30">
         <motion.div
@@ -275,33 +216,26 @@ export function MobileEditorView({ project }: MobileEditorViewProps) {
           transition={{ delay: 0.3, type: 'spring', stiffness: 280, damping: 25 }}
           className="flex items-center gap-1 px-2.5 py-2 rounded-full bg-background/80 backdrop-blur-2xl border border-border/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)]"
         >
-          {TOOLS.map(({ tab, icon: Icon, label }) => {
-            const isActive = activeBottomPanelTab === tab;
-            return (
-              <button
-                key={tab}
-                onClick={() => handleToolTap(tab)}
-                aria-label={label}
-                className={cn(
-                  'relative flex flex-col items-center justify-center h-11 w-11 rounded-full transition-all duration-200',
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/40 scale-110'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {isActive && (
-                  <motion.span
-                    layoutId="pill-indicator"
-                    className="absolute -bottom-0.5 h-1 w-1 rounded-full bg-primary-foreground"
-                  />
-                )}
-              </button>
-            );
-          })}
+          {TOOLS.map(({ key, icon: Icon, label }) => (
+            <button
+              key={key}
+              onClick={() => handleToolTap(key)}
+              aria-label={label}
+              className="relative flex flex-col items-center justify-center h-11 w-11 rounded-full transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95"
+            >
+              <Icon className="h-4 w-4" />
+            </button>
+          ))}
         </motion.div>
       </div>
 
+      {/* ── All overlay modals (same as desktop) ──────────────────────── */}
+      <AiDrawer />
+      <NewDiagramModal projectId={project._id} />
+      <DiagramModal project={project} />
+      <CitationModal project={project} />
+      <TableBuilderModal />
+      <ImageManagerModal project={project} />
     </div>
   );
 }

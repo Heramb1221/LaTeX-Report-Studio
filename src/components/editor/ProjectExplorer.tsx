@@ -317,7 +317,8 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
   const {
     activeChapterId, saveStatus, editorContent,
     setActiveChapterId, setEditorContent,
-    setActiveBottomPanelTab, setEditingDiagramId,
+    setEditingDiagramId, setNewDiagramModalOpen,
+    setImageManagerOpen, setCitationModalOpen,
   } = useEditorStore();
 
   const projectId = project._id;
@@ -396,7 +397,7 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
         label="Images" count={project.images?.length ?? 0}
         icon={ImageIcon} isExpanded={expanded.images}
         onToggle={() => toggle('images')}
-        onAdd={() => setActiveBottomPanelTab('images')} addLabel="Upload image"
+        onAdd={() => setImageManagerOpen(true)} addLabel="Upload image"
       />
       {expanded.images && (
         <div className="mb-1">
@@ -418,7 +419,7 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
         label="Diagrams" count={project.diagrams?.length ?? 0}
         icon={GitFork} isExpanded={expanded.diagrams}
         onToggle={() => toggle('diagrams')}
-        onAdd={() => setActiveBottomPanelTab('diagrams')} addLabel="New diagram"
+        onAdd={() => setNewDiagramModalOpen(true)} addLabel="New diagram"
       />
       {expanded.diagrams && (
         <div className="mb-1">
@@ -428,10 +429,7 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
               <DiagramRow
                 key={d.id}
                 diagram={d}
-                onClick={() => {
-                  setEditingDiagramId(d.id);
-                  setActiveBottomPanelTab('diagrams');
-                }}
+                onClick={() => setEditingDiagramId(d.id)}
                 onDelete={() => deleteDiagram(d.id)}
               />
             ))
@@ -446,7 +444,7 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
         label="References" count={project.references?.length ?? 0}
         icon={BookMarked} isExpanded={expanded.references}
         onToggle={() => toggle('references')}
-        onAdd={() => setActiveBottomPanelTab('citations')} addLabel="Add citation"
+        onAdd={() => setCitationModalOpen(true)} addLabel="Add citation"
       />
       {expanded.references && (
         <div className="mb-1">
@@ -456,7 +454,7 @@ export function ProjectExplorer({ project }: ProjectExplorerProps) {
               <ReferenceRow
                 key={ref.id}
                 reference={ref}
-                onClick={() => setActiveBottomPanelTab('citations')}
+                onClick={() => setCitationModalOpen(true)}
                 onDelete={() => deleteCitation(ref.id)}
               />
             ))

@@ -7,7 +7,12 @@ import type { IProject } from '@/types';
 import { EditorTopbar } from './EditorTopbar';
 import { EditorToolbar } from './EditorToolbar';
 import { PdfViewer } from './PdfViewer';
-import { EditorBottomPanel } from './EditorBottomPanel';
+import { AiDrawer } from './AiDrawer';
+import { NewDiagramModal } from './NewDiagramModal';
+import { DiagramModal } from './DiagramModal';
+import { CitationModal } from './CitationModal';
+import { TableBuilderModal } from './TableBuilderModal';
+import { ImageManagerModal } from './ImageManagerModal';
 import { MobileEditorView } from './MobileEditorView';
 import {
   ResizableHandle,
@@ -33,16 +38,16 @@ interface EditorLayoutProps {
 }
 
 export function EditorLayout({ project }: EditorLayoutProps) {
-  const { focusMode, activeBottomPanelTab } = useEditorStore();
+  const { focusMode } = useEditorStore();
 
   return (
     <>
-      {/* ── Mobile Layout (visible only on < md screens) ───────────────── */}
+      {/* ── Mobile Layout (visible only on < md screens) ─────────────────── */}
       <div className="md:hidden h-screen">
         <MobileEditorView project={project} />
       </div>
 
-      {/* ── Desktop Layout (visible only on md+ screens) ──────────────── */}
+      {/* ── Desktop Layout (visible only on md+ screens) ──────────────────── */}
       <div className="hidden md:flex h-screen flex-col overflow-hidden bg-background bg-dot-pattern">
         <EditorTopbar project={project} />
 
@@ -56,26 +61,11 @@ export function EditorLayout({ project }: EditorLayoutProps) {
           }}
         >
           <ResizablePanelGroup orientation="horizontal" className="flex-1 overflow-hidden shadow-2xl bg-background/50 backdrop-blur-sm">
-            {/* Left Side (Monaco Editor & Tools Panel) */}
+            {/* Monaco Editor (Left 50%) */}
             <ResizablePanel defaultSize={50} minSize={30}>
-              <ResizablePanelGroup orientation="vertical">
-                {/* Top Left: Monaco Editor */}
-                <ResizablePanel defaultSize={activeBottomPanelTab ? 65 : 100} minSize={30}>
-                  <div className="h-full min-w-0 flex flex-col relative z-10">
-                    <MonacoLatexEditor projectId={project._id} />
-                  </div>
-                </ResizablePanel>
-
-                {/* Bottom Left: Tools Panel (Conditionally rendered) */}
-                {activeBottomPanelTab && (
-                  <>
-                    <ResizableHandle withHandle className="bg-border/50 hover:bg-primary/50 transition-colors" />
-                    <ResizablePanel defaultSize={35} minSize={20} className="relative z-10">
-                      <EditorBottomPanel project={project} />
-                    </ResizablePanel>
-                  </>
-                )}
-              </ResizablePanelGroup>
+              <div className="h-full min-w-0 flex flex-col relative z-10">
+                <MonacoLatexEditor projectId={project._id} />
+              </div>
             </ResizablePanel>
 
             <ResizableHandle withHandle className="bg-border/50 hover:bg-primary/50 transition-colors" />
@@ -93,6 +83,14 @@ export function EditorLayout({ project }: EditorLayoutProps) {
         </motion.div>
 
         <EditorToolbar />
+
+        {/* All overlay panels — always mounted, open/close via store */}
+        <AiDrawer />
+        <NewDiagramModal projectId={project._id} />
+        <DiagramModal project={project} />
+        <CitationModal project={project} />
+        <TableBuilderModal />
+        <ImageManagerModal project={project} />
       </div>
     </>
   );

@@ -18,11 +18,11 @@ import {
 } from 'lucide-react';
 
 type ToolAction =
-  | 'tables'
-  | 'images'
-  | 'diagrams'
-  | 'citations'
-  | 'ai';
+  | 'table-builder'
+  | 'image-manager'
+  | 'new-diagram'
+  | 'citation'
+  | 'ai-humanize';
 
 interface ToolItem {
   icon: React.ElementType;
@@ -32,30 +32,34 @@ interface ToolItem {
 }
 
 const TOOLS: ToolItem[] = [
-  { icon: Table2,     label: 'Table Builder',    shortLabel: 'Table',    action: 'tables'    },
-  { icon: ImagePlus,  label: 'Image Manager',    shortLabel: 'Image',    action: 'images'    },
-  { icon: GitFork,    label: 'Diagram Editor',   shortLabel: 'Diagram',  action: 'diagrams'  },
-  { icon: BookMarked, label: 'Citation Manager', shortLabel: 'Citation', action: 'citations' },
-  { icon: Sparkles,   label: 'AI Panel',         shortLabel: 'AI',       action: 'ai'        },
+  { icon: Table2,     label: 'Table Builder',    shortLabel: 'Table',    action: 'table-builder'  },
+  { icon: ImagePlus,  label: 'Image Manager',    shortLabel: 'Image',    action: 'image-manager'  },
+  { icon: GitFork,    label: 'Diagram Editor',   shortLabel: 'Diagram',  action: 'new-diagram'    },
+  { icon: BookMarked, label: 'Citation Manager', shortLabel: 'Citation', action: 'citation'       },
+  { icon: Sparkles,   label: 'AI Panel',         shortLabel: 'AI',       action: 'ai-humanize'    },
 ];
 
 export function EditorToolbar() {
   const {
     focusMode,
-    activeBottomPanelTab,
-    setActiveBottomPanelTab,
+    setIsAiDrawerOpen,
     setAiDrawerMode,
+    setNewDiagramModalOpen,
+    setCitationModalOpen,
+    setTableBuilderOpen,
+    setImageManagerOpen,
   } = useEditorStore();
 
   const handleClick = (action: ToolAction) => {
-    // Toggle tab off if it's already active
-    if (activeBottomPanelTab === action) {
-      setActiveBottomPanelTab(null);
-      return;
-    }
-    setActiveBottomPanelTab(action);
-    if (action === 'ai') {
-      setAiDrawerMode('humanize');
+    switch (action) {
+      case 'table-builder':   setTableBuilderOpen(true);           break;
+      case 'image-manager':   setImageManagerOpen(true);           break;
+      case 'new-diagram':     setNewDiagramModalOpen(true);        break;
+      case 'citation':        setCitationModalOpen(true);          break;
+      case 'ai-humanize':
+        setAiDrawerMode('humanize');
+        setIsAiDrawerOpen(true);
+        break;
     }
   };
 
@@ -76,7 +80,7 @@ export function EditorToolbar() {
                 <Tooltip key={tool.label}>
                   <TooltipTrigger asChild>
                     <Button
-                      variant={activeBottomPanelTab === tool.action ? 'secondary' : 'ghost'}
+                      variant="ghost"
                       size="sm"
                       className="h-8 gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 text-xs rounded-sm"
                       onClick={() => handleClick(tool.action)}
