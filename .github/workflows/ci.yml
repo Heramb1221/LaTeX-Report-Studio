@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: TypeScript + Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          # Provide dummy env vars so the build doesn't fail on missing vars.
+          # These do NOT grant any real access — they're just for type-checking.
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          MONGODB_URI: mongodb://localhost:27017/test
+          JWT_SECRET: 0000000000000000000000000000000000000000000000000000000000000000
+          ENCRYPTION_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+          R2_ACCOUNT_ID: dummy
+          R2_ACCESS_KEY_ID: dummy
+          R2_SECRET_ACCESS_KEY: dummy
+          R2_BUCKET_NAME: dummy
+          R2_PUBLIC_URL: https://pub-dummy.r2.dev
+          GMAIL_USER: dummy@gmail.com
+          GMAIL_APP_PASSWORD: dummypassword
+          EMAIL_FROM: dummy@gmail.com
