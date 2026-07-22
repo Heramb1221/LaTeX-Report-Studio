@@ -1,17 +1,9 @@
 'use client';
 
 import { useRef, useState, useCallback } from 'react';
-import { useEditorStore } from '@/store/editorStore';
 import { useUploadImage, useDeleteImage } from '@/hooks/useImage';
 import type { IProject, IImage } from '@/types';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,13 +17,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import {
-  ImagePlus,
   Trash2,
   CornerDownLeft,
   Loader2,
   Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ─── Accepted MIME types ──────────────────────────────────────────────────────
 
@@ -95,7 +87,7 @@ function UploadZone({ onFile, isUploading }: UploadZoneProps) {
       onDragLeave={() => setIsDragOver(false)}
       onDrop={handleDrop}
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-pointer',
+        'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors cursor-pointer',
         isDragOver
           ? 'border-primary bg-primary/5'
           : 'border-border hover:border-primary/50 hover:bg-muted/20',
@@ -113,16 +105,16 @@ function UploadZone({ onFile, isUploading }: UploadZoneProps) {
       />
 
       {isUploading ? (
-        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        <Loader2 className="h-6 w-6 text-primary animate-spin" />
       ) : (
-        <Upload className="h-8 w-8 text-muted-foreground" />
+        <Upload className="h-6 w-6 text-muted-foreground" />
       )}
 
       <div>
-        <p className="text-sm font-medium">
+        <p className="text-xs font-medium">
           {isUploading ? 'Uploading…' : 'Drop images here or click to browse'}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-[10px] text-muted-foreground mt-0.5">
           JPG, PNG, GIF, WebP · Max {MAX_SIZE_MB} MB each
         </p>
       </div>
@@ -146,7 +138,7 @@ function ImageCard({ image, onInsert, onDelete }: ImageCardProps) {
       <img
         src={image.publicUrl}
         alt={image.originalName}
-        className="w-full h-24 object-cover"
+        className="w-full h-20 object-cover"
         loading="lazy"
       />
 
@@ -155,7 +147,7 @@ function ImageCard({ image, onInsert, onDelete }: ImageCardProps) {
         <Button
           size="sm"
           variant="secondary"
-          className="w-full h-7 text-xs gap-1"
+          className="w-full h-6 text-[10px] gap-1"
           onClick={() => onInsert(image)}
         >
           <CornerDownLeft className="h-3 w-3" />
@@ -167,7 +159,7 @@ function ImageCard({ image, onInsert, onDelete }: ImageCardProps) {
             <Button
               size="sm"
               variant="destructive"
-              className="w-full h-7 text-xs gap-1"
+              className="w-full h-6 text-[10px] gap-1"
             >
               <Trash2 className="h-3 w-3" />
               Delete
@@ -198,8 +190,8 @@ function ImageCard({ image, onInsert, onDelete }: ImageCardProps) {
       </div>
 
       {/* Filename label */}
-      <div className="px-2 py-1.5 border-t">
-        <p className="text-[11px] text-muted-foreground truncate" title={image.originalName}>
+      <div className="px-2 py-1 border-t bg-background">
+        <p className="text-[10px] text-muted-foreground truncate" title={image.originalName}>
           {image.originalName}
         </p>
       </div>
@@ -207,14 +199,13 @@ function ImageCard({ image, onInsert, onDelete }: ImageCardProps) {
   );
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 
-interface ImageManagerModalProps {
+interface ImageToolProps {
   project: IProject;
 }
 
-export function ImageManagerModal({ project }: ImageManagerModalProps) {
-  const { imageManagerOpen, setImageManagerOpen } = useEditorStore();
+export function ImageTool({ project }: ImageToolProps) {
   const { uploadImage, isUploading } = useUploadImage(project._id);
   const { deleteImage } = useDeleteImage(project._id);
   const { toast } = useToast();
@@ -224,7 +215,6 @@ export function ImageManagerModal({ project }: ImageManagerModalProps) {
   const handleInsert = (image: IImage) => {
     if (typeof window !== 'undefined' && window.__lrsInsertAtCursor) {
       window.__lrsInsertAtCursor(image.latexCommand);
-      setImageManagerOpen(false);
     } else {
       toast({
         variant: 'destructive',
@@ -235,54 +225,34 @@ export function ImageManagerModal({ project }: ImageManagerModalProps) {
   };
 
   return (
-    <Dialog open={imageManagerOpen} onOpenChange={setImageManagerOpen}>
-      <DialogContent className="max-w-2xl w-full flex flex-col max-h-[85vh] p-0 gap-0">
-        <DialogHeader className="px-6 pt-5 pb-4 border-b shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <ImagePlus className="h-4 w-4" />
-            Image Manager
-          </DialogTitle>
-          <DialogDescription>
-            Upload images to use in your report. Click an image to insert a{' '}
-            <code className="text-xs">{'\\begin{figure}'}</code> block at the
-            cursor.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="flex flex-col h-full bg-background p-4 min-h-0">
+      <div className="flex-shrink-0 mb-4">
+        <UploadZone onFile={uploadImage} isUploading={isUploading} />
+      </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Upload zone */}
-          <UploadZone onFile={uploadImage} isUploading={isUploading} />
-
-          {/* Gallery */}
-          {images.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              No images uploaded yet. Add one above.
+      <ScrollArea className="flex-1 min-h-0">
+        {images.length === 0 ? (
+          <div className="text-center py-6 text-xs text-muted-foreground">
+            No images uploaded yet.
+          </div>
+        ) : (
+          <div className="pr-3 pb-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Gallery ({images.length})
+            </p>
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {images.map((img) => (
+                <ImageCard
+                  key={img.id}
+                  image={img}
+                  onInsert={handleInsert}
+                  onDelete={deleteImage}
+                />
+              ))}
             </div>
-          ) : (
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Uploaded Images ({images.length})
-              </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {images.map((img) => (
-                  <ImageCard
-                    key={img.id}
-                    image={img}
-                    onInsert={handleInsert}
-                    onDelete={deleteImage}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex justify-end px-6 py-4 border-t shrink-0">
-          <Button variant="outline" onClick={() => setImageManagerOpen(false)}>
-            Close
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        )}
+      </ScrollArea>
+    </div>
   );
 }

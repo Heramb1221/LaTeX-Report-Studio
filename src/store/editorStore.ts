@@ -5,6 +5,7 @@ import { create } from 'zustand';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'unsaved';
 type AiDrawerMode = 'humanize' | 'convert' | 'grammar';
+export type BottomPanelTab = 'ai' | 'citations' | 'diagrams' | 'images' | 'tables' | null;
 
 interface EditorStore {
   activeChapterId: string | null;
@@ -23,25 +24,14 @@ interface EditorStore {
   setCompiledPdf: (base64: string | null) => void;
   setCompileError: (error: string | null) => void;
 
-  isAiDrawerOpen: boolean;
+  activeBottomPanelTab: BottomPanelTab;
+  setActiveBottomPanelTab: (tab: BottomPanelTab) => void;
+
   aiDrawerMode: AiDrawerMode;
-  setIsAiDrawerOpen: (open: boolean) => void;
   setAiDrawerMode: (mode: AiDrawerMode) => void;
 
-  newDiagramModalOpen: boolean;
-  setNewDiagramModalOpen: (open: boolean) => void;
   editingDiagramId: string | null;
   setEditingDiagramId: (id: string | null) => void;
-
-  citationModalOpen: boolean;
-  setCitationModalOpen: (open: boolean) => void;
-
-  tableBuilderOpen: boolean;
-  setTableBuilderOpen: (open: boolean) => void;
-
-  /** Phase 11: Image Manager modal */
-  imageManagerOpen: boolean;
-  setImageManagerOpen: (open: boolean) => void;
 
   focusMode: boolean;
   setFocusMode: (open: boolean) => void;
@@ -57,13 +47,9 @@ const INITIAL: Omit<
   | 'setIsCompiling'
   | 'setCompiledPdf'
   | 'setCompileError'
-  | 'setIsAiDrawerOpen'
+  | 'setActiveBottomPanelTab'
   | 'setAiDrawerMode'
-  | 'setNewDiagramModalOpen'
   | 'setEditingDiagramId'
-  | 'setCitationModalOpen'
-  | 'setTableBuilderOpen'
-  | 'setImageManagerOpen'
   | 'setFocusMode'
   | 'reset'
 > = {
@@ -73,13 +59,9 @@ const INITIAL: Omit<
   isCompiling: false,
   compiledPdfBase64: null,
   compileError: null,
-  isAiDrawerOpen: false,
+  activeBottomPanelTab: null,
   aiDrawerMode: 'humanize',
-  newDiagramModalOpen: false,
   editingDiagramId: null,
-  citationModalOpen: false,
-  tableBuilderOpen: false,
-  imageManagerOpen: false,
   focusMode: false,
 };
 
@@ -96,15 +78,10 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setCompileError: (error) =>
     set({ compileError: error, compiledPdfBase64: null, isCompiling: false }),
 
-  setIsAiDrawerOpen: (open) => set({ isAiDrawerOpen: open }),
+  setActiveBottomPanelTab: (tab) => set({ activeBottomPanelTab: tab }),
   setAiDrawerMode: (mode) => set({ aiDrawerMode: mode }),
 
-  setNewDiagramModalOpen: (open) => set({ newDiagramModalOpen: open }),
   setEditingDiagramId: (id) => set({ editingDiagramId: id }),
-
-  setCitationModalOpen: (open) => set({ citationModalOpen: open }),
-  setTableBuilderOpen: (open) => set({ tableBuilderOpen: open }),
-  setImageManagerOpen: (open) => set({ imageManagerOpen: open }),
   
   setFocusMode: (open) => set({ focusMode: open }),
 
