@@ -6,6 +6,8 @@ import { sendPasswordResetEmail } from '@/lib/email/mailer';
 import { forgotPasswordSchema } from '@/lib/validations/auth';
 import { validationError, serverError } from '@/lib/auth/middleware';
 
+import { getAppUrl } from '@/lib/config/url';
+
 // Always return this message regardless of whether the email exists.
 // This prevents attackers from discovering which emails are registered.
 const SUCCESS_MSG =
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       
       // DX Improvement: Log the reset link in development mode
       if (process.env.NODE_ENV === 'development') {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+        const appUrl = getAppUrl();
         console.log('\n======================================================');
         console.log('🔑 [DEV] Password Reset Link:');
         console.log(`${appUrl}/reset-password?token=${resetToken}`);

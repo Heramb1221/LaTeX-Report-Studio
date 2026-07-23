@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { getAppUrl } from '@/lib/config/url';
 
 // ─── Transport singleton ─────────────────────────────────────────────────────
 // Create once and reuse across requests. Nodemailer handles connection pooling.
@@ -84,7 +85,7 @@ export async function sendVerificationEmail(
   to: string,
   token: string
 ): Promise<void> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = getAppUrl();
   const url = `${appUrl}/verify-email?token=${token}`;
 
   const html = emailWrapper(`
@@ -112,7 +113,7 @@ export async function sendPasswordResetEmail(
   to: string,
   token: string
 ): Promise<void> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = getAppUrl();
   const url = `${appUrl}/reset-password?token=${token}`;
 
   const html = emailWrapper(`

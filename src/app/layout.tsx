@@ -10,6 +10,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from "@/lib/utils";
+import { getAppUrl } from '@/lib/config/url';
 
 const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
 
@@ -24,6 +25,7 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppUrl()),
   title: {
     default: 'LaTeX Report Studio',
     template: '%s — LaTeX Report Studio',
@@ -31,6 +33,19 @@ export const metadata: Metadata = {
   description:
     'The unified engineering report workspace. Write, humanize, diagram, cite, and compile — all in one place.',
   keywords: ['LaTeX', 'engineering report', 'IEEE', 'technical writing', 'diagram'],
+  openGraph: {
+    title: 'LaTeX Report Studio',
+    description: 'The unified engineering report workspace. Write, humanize, diagram, cite, and compile — all in one place.',
+    url: getAppUrl(),
+    siteName: 'LaTeX Report Studio',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LaTeX Report Studio',
+    description: 'The unified engineering report workspace. Write, humanize, diagram, cite, and compile — all in one place.',
+  },
 };
 
 export default function RootLayout({
